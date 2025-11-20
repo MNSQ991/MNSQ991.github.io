@@ -3,16 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>🎮 多游戏大厅</title>
-  <meta name="description" content="贪吃蛇 | 五子棋 | 猜数字">
+  <title>🎮 多游戏大厅 v2.0</title>
+  <meta name="description" content="贪吃蛇 | 五子棋AI | 石头剪刀布">
 
-  <!-- PWA 设置 -->
+  <!-- PWA & 统计 -->
   <meta name="theme-color" content="#111">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <!-- Cloudflare Web Analytics -->
   <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
           data-cf-beacon='{"token": "ce8176d5e3c44c9a8b20d9f0e5d6a7b8"}'></script>
 
@@ -25,11 +21,7 @@
       padding: 10px;
       color: #333;
     }
-
-    h1 {
-      color: #0074D9;
-      margin: 15px 0;
-    }
+    h1 { color: #0074D9; margin: 20px 0; }
 
     /* 主菜单网格 */
     .menu-grid {
@@ -39,7 +31,6 @@
       max-width: 800px;
       margin: 20px auto;
     }
-
     .menu-btn {
       height: 150px;
       display: flex;
@@ -54,18 +45,15 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       transition: transform 0.2s;
     }
-    .menu-btn:hover {
-      transform: scale(1.05);
-    }
-    .menu-btn:active {
-      transform: scale(0.98);
-    }
+    .menu-btn:hover { transform: scale(1.05); }
+    .menu-btn:active { transform: scale(0.98); }
 
     #snake-btn { background: linear-gradient(135deg, #0074D9, #0056a3); }
     #gobang-btn { background: linear-gradient(135deg, #393, #262); }
+    #rps-btn { background: linear-gradient(135deg, #D94F00, #a04000); }
     #guess-btn { background: linear-gradient(135deg, #D9534F, #a0302a); }
 
-    /* 游戏容器 */
+    /* 游戏容器（覆盖式） */
     .game-container {
       display: none;
       max-width: 800px;
@@ -95,10 +83,9 @@
       cursor: pointer;
     }
 
-    /* 贪吃蛇样式 */
+    /* 贪吃蛇 */
     #snake-game {
-      width: 400px;
-      height: 400px;
+      width: 400px; height: 400px;
       margin: 0 auto;
       border: 8px solid #333;
       background: #111;
@@ -106,50 +93,39 @@
     }
     .snake-part { position: absolute; width: 20px; height: 20px; background: #0f0; border-radius: 4px; }
     .snake-part:first-child { background: #0f8; box-shadow: 0 0 6px #0f8; }
-    .food { position: absolute; width: 20px; height: 20px; background: red; border-radius: 50%; box-shadow: 0 0 8px yellow; }
+    .food { position: absolute; width: 20px; height: 20px; background: red; border-radius: 50%; }
 
-    /* 五子棋样式 */
+    /* 五子棋 */
     #gobang-board {
-      width: 400px;
-      height: 400px;
+      width: 400px; height: 400px;
       margin: 20px auto;
       background: #e8c497;
       border: 6px solid #8b4513;
       position: relative;
     }
-    .gobang-line {
-      position: absolute;
-      background: #333;
-    }
-    .gobang-row { height: 1px; width: 380px; top: calc((var(--y) * 40px) + 10px); left: 10px; }
-    .gobang-col { width: 1px; height: 380px; left: calc((var(--x) * 40px) + 10px); top: 10px; }
-    .stone {
-      position: absolute;
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      transform: translateY(-50%);
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-    }
-    .black { background: #111; top: calc((var(--y) * 40px) + 10px + 17px); left: calc((var(--x) * 40px) + 10px + 17px); }
-    .white { background: #fff; top: calc((var(--y) * 40px) + 10px + 17px); left: calc((var(--x) * 40px) + 10px + 17px); }
+    .gobang-line { position: absolute; background: #333; }
+    .gobang-row { height: 1px; width: 380px; top: calc((var(--y)*40px)+10px); left: 10px; }
+    .gobang-col { width: 1px; height: 380px; left: calc((var(--x)*40px)+10px); top: 10px; }
+    .stone { position: absolute; width: 34px; height: 34px; border-radius: 50%; transform: translateY(-50%); }
+    .black { background: #111; top: calc((var(--y)*40px)+27px); left: calc((var(--x)*40px)+27px); }
+    .white { background: #fff; border: 1px solid #ccc; top: calc((var(--y)*40px)+27px); left: calc((var(--x)*40px)+27px); }
 
-    /* 猜数字样式 */
-    #guess-input {
-      padding: 10px;
-      font-size: 18px;
-      margin: 10px;
-      width: 150px;
+    /* 猜数字 */
+    #guess-input { padding: 10px; font-size: 18px; margin: 10px; width: 150px; }
+    #guess-log { text-align: left; margin: 15px auto; padding: 10px; background: #f5f5f5; border-radius: 5px; max-height: 200px; overflow-y: auto; font-size: 14px; }
+
+    /* 石头剪刀布 */
+    .rps-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
     }
-    #guess-log {
-      text-align: left;
-      margin: 15px auto;
-      padding: 10px;
-      background: #f5f5f5;
-      border-radius: 5px;
-      max-height: 200px;
-      overflow-y: auto;
-      font-size: 14px;
+    .rps-choice {
+      font-size: 30px; cursor: pointer; padding: 10px 20px; border-radius: 10px; background: #eee; transition: 0.2s;
     }
+    .rps-choice:hover { background: #ddd; transform: scale(1.1); }
+    #rps-result { margin: 15px; font-size: 18px; }
 
     .footer {
       margin-top: 40px;
@@ -165,23 +141,24 @@
 </head>
 <body>
 
-  <h1>🎮 多游戏大厅</h1>
+  <h1>🎮 多游戏大厅 v2.0</h1>
 
   <!-- 主菜单 -->
   <div class="menu-grid">
     <button class="menu-btn" onclick="showGame('snake')">🐍 贪吃蛇</button>
     <button class="menu-btn" onclick="showGame('gobang')">⚫ 五子棋</button>
-    <button class="menu-btn" style="grid-column: span 2;" onclick="showGame('guess')"> 🔢 猜数字</button>
+    <button class="menu-btn" onclick="showGame('rps')">✊✂️📄 石头剪刀布</button>
+    <button class="menu-btn" onclick="showGame('guess')">🔢 猜数字</button>
   </div>
 
-  <!-- 贪吃蛇游戏 -->
+  <!-- 贪吃蛇 -->
   <div id="snake-screen" class="game-container">
     <div class="game-header">
       <h2>🐍 贪吃蛇</h2>
       <button class="back-btn" onclick="backToMenu()">返回</button>
     </div>
+    <div>得分：<span id="snake-score">0</span> | 🏆 最高分：<span id="snake-high">0</span></div>
     <div id="snake-game"></div>
-    <div>得分：<span id="snake-score">0</span></div>
     <div style="margin: 10px;">
       <button onclick="setSnakeDir('up')">⬆️</button><br/>
       <button onclick="setSnakeDir('left')">⬅️</button>
@@ -190,18 +167,34 @@
     </div>
   </div>
 
-  <!-- 五子棋游戏 -->
+  <!-- 五子棋 -->
   <div id="gobang-screen" class="game-container">
     <div class="game-header">
-      <h2>⚫ 五子棋</h2>
+      <h2>⚫ 五子棋（人机对战）</h2>
       <button class="back-btn" onclick="backToMenu()">返回</button>
     </div>
-    <div>当前玩家：<span id="gobang-player" style="color: #111;">黑子</span></div>
+    <div>当前：<span id="gobang-player" style="color: #111;">你（黑子）</span></div>
     <div id="gobang-board"></div>
     <button onclick="resetGobang()">🔄 重新开始</button>
   </div>
 
-  <!-- 猜数字游戏 -->
+  <!-- 石头剪刀布 -->
+  <div id="rps-screen" class="game-container">
+    <div class="game-header">
+      <h2>✊✂️📄 石头剪刀布</h2>
+      <button class="back-btn" onclick="backToMenu()">返回</button>
+    </div>
+    <p>你出什么？</p>
+    <div class="rps-btns">
+      <div class="rps-choice" onclick="playRPS('rock')">✊ 石头</div>
+      <div class="rps-choice" onclick="playRPS('paper')">📄 布</div>
+      <div class="rps-choice" onclick="playRPS('scissors')">✂️ 剪刀</div>
+    </div>
+    <div id="rps-result">胜率：0胜0负0平</div>
+    <button onclick="resetRPS()">清空记录</button>
+  </div>
+
+  <!-- 猜数字 -->
   <div id="guess-screen" class="game-container">
     <div class="game-header">
       <h2>🔢 猜数字</h2>
@@ -214,28 +207,31 @@
   </div>
 
   <div class="footer">
-    <a href="blog.html">⬅️ 回博客主页</a> | 可添加到主屏幕离线游玩！
+    <a href="blog.html">⬅️ 回博客主页</a> | 支持离线游玩！
   </div>
 
   <script>
-    // ============ 全局函数 ============
-    function showGame(gameId) {
+    // ============ 全局切换 ============
+    function showGame(id) {
       document.querySelectorAll('.game-container').forEach(el => el.style.display = 'none');
-      document.getElementById(gameId + '-screen').style.display = 'block';
-      if (gameId === 'snake') initSnake();
-      if (gameId === 'gobang') initGobang();
-      if (gameId === 'guess') initGuess();
+      document.getElementById(id + '-screen').style.display = 'block';
+      if (id === 'snake') initSnake();
+      if (id === 'gobang') initGobang();
+      if (id === 'guess') initGuess();
+      if (id === 'rps') loadRPSStats();
     }
 
     function backToMenu() {
       document.querySelectorAll('.game-container').forEach(el => el.style.display = 'none');
     }
 
-    // ============ 贪吃蛇 ============
+    // ============ 贪吃蛇（带最高分）===========
     let snake = [], food = {}, direction = 'right', nextDir = 'right';
     let snakeScore = 0, snakeInterval;
+    let snakeHighScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
 
     function initSnake() {
+      document.getElementById('snake-high').textContent = snakeHighScore;
       const game = document.getElementById('snake-game');
       game.innerHTML = '';
       snake = [{x: 10, y: 10}];
@@ -300,18 +296,22 @@
 
     function gameOver() {
       clearInterval(snakeInterval);
-      alert('游戏结束！得分：' + snakeScore);
+      if (snakeScore > snakeHighScore) {
+        snakeHighScore = snakeScore;
+        localStorage.setItem('snakeHighScore', snakeHighScore);
+        document.getElementById('snake-high').textContent = snakeHighScore;
+      }
+      alert(`游戏结束！得分：${snakeScore}（最高：${snakeHighScore}）`);
       backToMenu();
     }
 
-    // ============ 五子棋 ============
-    let gobangBoard = Array(15).fill().map(() => Array(15).fill(0)); // 0:空, 1:黑, 2:白
-    let currentPlayer = 1;
+    // ============ 五子棋（AI 对战）===========
+    let gobangBoard = Array(15).fill().map(() => Array(15).fill(0));
+    let gameActive = true;
 
     function initGobang() {
       const board = document.getElementById('gobang-board');
       board.innerHTML = '';
-      // 画线
       for (let i = 0; i < 15; i++) {
         const row = document.createElement('div');
         row.className = 'gobang-line gobang-row';
@@ -322,38 +322,78 @@
         col.style.setProperty('--x', i);
         board.appendChild(col);
       }
-      // 重置
       gobangBoard = Array(15).fill().map(() => Array(15).fill(0));
-      currentPlayer = 1;
-      document.getElementById('gobang-player').textContent = '黑子';
-      document.getElementById('gobang-player').style.color = '#111';
-      board.onclick = placeStone;
+      gameActive = true;
+      board.onclick = playerMove;
     }
 
-    function placeStone(e) {
+    function playerMove(e) {
+      if (!gameActive) return;
       const rect = this.getBoundingClientRect();
       const x = Math.round((e.clientX - rect.left - 10) / 40);
       const y = Math.round((e.clientY - rect.top - 10) / 40);
       if (x < 0 || x > 14 || y < 0 || y > 14 || gobangBoard[y][x] !== 0) return;
 
-      gobangBoard[y][x] = currentPlayer;
-      const stone = document.createElement('div');
-      stone.className = 'stone ' + (currentPlayer === 1 ? 'black' : 'white');
-      stone.style.setProperty('--x', x);
-      stone.style.setProperty('--y', y);
-      this.appendChild(stone);
-
-      if (checkWin(x, y, currentPlayer)) {
-        setTimeout(() => {
-          alert(`${currentPlayer === 1 ? '黑子' : '白子'} 获胜！`);
-          resetGobang();
-        }, 100);
+      placeStone(x, y, 1); // 1=黑=玩家
+      if (checkWin(x, y, 1)) {
+        setTimeout(() => alert('你赢了！'), 200);
+        gameActive = false;
         return;
       }
 
-      currentPlayer = 3 - currentPlayer; // 1→2, 2→1
-      document.getElementById('gobang-player').textContent = currentPlayer === 1 ? '黑子' : '白子';
-      document.getElementById('gobang-player').style.color = currentPlayer === 1 ? '#111' : '#fff';
+      // AI 回合
+      setTimeout(aiMove, 500);
+    }
+
+    function placeStone(x, y, player) {
+      gobangBoard[y][x] = player;
+      const stone = document.createElement('div');
+      stone.className = 'stone ' + (player === 1 ? 'black' : 'white');
+      stone.style.setProperty('--x', x);
+      stone.style.setProperty('--y', y);
+      document.getElementById('gobang-board').appendChild(stone);
+    }
+
+    function aiMove() {
+      if (!gameActive) return;
+      // 简单 AI：找空位随机下（可升级为评分算法）
+      const empty = [];
+      for (let y = 0; y < 15; y++) {
+        for (let x = 0; x < 15; x++) {
+          if (gobangBoard[y][x] === 0) {
+            // 优先靠近已有棋子
+            if (hasNeighbor(x, y)) empty.push([x, y]);
+          }
+        }
+      }
+      const candidates = empty.length > 0 ? empty : getAllEmpty();
+      const [x, y] = candidates[Math.floor(Math.random() * candidates.length)];
+      placeStone(x, y, 2); // 2=白=AI
+
+      if (checkWin(x, y, 2)) {
+        setTimeout(() => alert('AI 赢了！'), 200);
+        gameActive = false;
+      }
+    }
+
+    function hasNeighbor(x, y) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          if (gobangBoard[y+dy]?.[x+dx]) return true;
+        }
+      }
+      return false;
+    }
+
+    function getAllEmpty() {
+      const res = [];
+      for (let y = 0; y < 15; y++) {
+        for (let x = 0; x < 15; x++) {
+          if (gobangBoard[y][x] === 0) res.push([x, y]);
+        }
+      }
+      return res;
     }
 
     function checkWin(x, y, player) {
@@ -396,7 +436,7 @@
       }
       guessCount++;
       if (guess === targetNumber) {
-        const msg = `🎉 恭喜！你猜对了！答案是 ${targetNumber}，共用了 ${guessCount} 次。`;
+        const msg = `🎉 恭喜！答案是 ${targetNumber}，共用了 ${guessCount} 次。`;
         addLog(msg, 'green');
         setTimeout(() => {
           alert(msg);
@@ -419,26 +459,68 @@
       log.scrollTop = log.scrollHeight;
     }
 
-    // ============ Service Worker ============
+    // ============ 石头剪刀布 ============
+    let rpsStats = JSON.parse(localStorage.getItem('rpsStats') || '{"win":0,"lose":0,"tie":0}');
+
+    function loadRPSStats() {
+      updateRPSResult();
+    }
+
+    function playRPS(player) {
+      const choices = ['rock', 'paper', 'scissors'];
+      const ai = choices[Math.floor(Math.random() * 3)];
+      const result = getResult(player, ai);
+      if (result === 'win') rpsStats.win++;
+      else if (result === 'lose') rpsStats.lose++;
+      else rpsStats.tie++;
+      localStorage.setItem('rpsStats', JSON.stringify(rpsStats));
+
+      document.getElementById('rps-result').innerHTML = `
+        🧑‍🦰 你：${emoji(player)} vs 🤖 AI：${emoji(ai)} → <strong>${desc(result)}</strong><br/>
+        胜率：${rpsStats.win}胜 ${rpsStats.lose}负 ${rpsStats.tie}平
+      `;
+    }
+
+    function getResult(p, a) {
+      if (p === a) return 'tie';
+      if ((p === 'rock' && a === 'scissors') ||
+          (p === 'paper' && a === 'rock') ||
+          (p === 'scissors' && a === 'paper')) return 'win';
+      return 'lose';
+    }
+
+    function emoji(choice) {
+      return {rock: '✊', paper: '📄', scissors: '✂️'}[choice];
+    }
+
+    function desc(result) {
+      return {win: '你赢了！🎉', lose: 'AI 赢了！🤖', tie: '平局~'}[result];
+    }
+
+    function updateRPSResult() {
+      document.getElementById('rps-result').textContent = `胜率：${rpsStats.win}胜${rpsStats.lose}负${rpsStats.tie}平`;
+    }
+
+    function resetRPS() {
+      rpsStats = {win:0, lose:0, tie:0};
+      localStorage.setItem('rpsStats', JSON.stringify(rpsStats));
+      updateRPSResult();
+    }
+
+    // Service Worker
     if ('serviceWorker' in navigator) {
       const swScript = `
-        self.addEventListener('install', e => {
-          e.waitUntil(caches.open('games-v1').then(cache => cache.addAll(['/'])));
-        });
-        self.addEventListener('fetch', e => {
-          e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-        });
+        self.addEventListener('install', e => e.waitUntil(caches.open('games-v2').then(cache => cache.addAll(['/'])));
+        self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
       `;
       const blob = new Blob([swScript], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register(swUrl);
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register(swUrl));
     }
 
-    // 初始提示
+    // 欢迎提示
     setTimeout(() => {
-      alert("🎮 欢迎来到多游戏大厅！\n点击按钮进入游戏，支持离线游玩！");
+      alert("🎮 欢迎来到多游戏大厅！\n所有游戏支持离线游玩，数据本地保存！");
     }, 600);
   </script>
 </body>
