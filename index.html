@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>✍️ 我的博客</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+    }
+    button {
+      background: #0074D9;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #0056a3;
+    }
+    .section {
+      background: #f9f9f9;
+      padding: 25px;
+      margin: 30px 0;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    .tip {
+      font-size: 0.9em;
+      color: #666;
+      background: #f0f8ff;
+      padding: 15px;
+      border-left: 4px solid #0074D9;
+      margin: 20px 0;
+    }
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      color: #999;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 博客标题 -->
+  <h1>📝 我的 GitHub 博客</h1>
+  <p>在这里写下我的思考与成长。所有文章都会保存为 Markdown 文件，提交到 GitHub 永久归档。</p>
+
+  <!-- 写文章区域 -->
+  <div class="section">
+    <h2>✍️ 写一篇文章</h2>
+    <input type="text" id="postTitle" placeholder="输入文章标题" />
+    <textarea id="postContent" placeholder="用 Markdown 写下你的想法...
+例如：
+## 这是一个小标题
+- 列表项1
+- 列表项2
+![图片](图片链接)"></textarea>
+
+    <button onclick="generateMarkdown()">生成 .md 文件</button>
+    <button onclick="resetForm()">清空</button>
+
+    <div class="tip">
+      💡 操作流程：<br>
+      1. 写完点击“生成 .md 文件” → 浏览器会下载一个文件<br>
+      2. 把它放入本地项目的 <code>_posts/</code> 文件夹<br>
+      3. 执行 <code>git add . && git commit -m '新文章' && git push</code><br>
+      4. 几分钟后，文章自动上线！
+    </div>
+  </div>
+
+  <!-- 已有文章列表（模拟） -->
+  <div class="section">
+    <h2>📦 已发布的文章</h2>
+    <ul>
+      <li><a href="_posts/2025-11-20-我的第一篇博客.md" target="_blank">2025-11-20 - 我的第一篇博客</a></li>
+      <li><em>更多文章将在你生成后出现</em></li>
+    </ul>
+    <p>📌 所有文章都以 Markdown 格式保存在 <code>_posts/</code> 目录中，可通过 Git 版本管理。</p>
+  </div>
+
+  <footer>
+    Powered by GitHub Pages | 写作即出版 ✨
+  </footer>
+
+  <script>
+    function generateMarkdown() {
+      const title = document.getElementById("postTitle").value.trim();
+      const content = document.getElementById("postContent").value.trim();
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];  // 2025-11-20
+      const timeStr = now.toTimeString().split(' ')[0]; // 18:08:00
+
+      if (!title) {
+        alert("请填写标题！");
+        return;
+      }
+      if (!content) {
+        alert("请写点内容！");
+        return;
+      }
+
+      // 文件名安全处理
+      const safeTitle = title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '-') || 'untitled';
+      const filename = `_posts/${dateStr}-${safeTitle}.md`;
+
+      // Markdown 文件内容
+      const markdownContent = `---
+layout: post
+title: "${title}"
+date: ${dateStr} ${timeStr} +0800
+---
+
+${content}
+`;
+
+      // 下载文件
+      const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert(`✅ 成功生成：${filename}\\n请将文件保存到你的本地仓库 _posts/ 文件夹，并推送到 GitHub。`);
+    }
+
+    function resetForm() {
+      if (confirm("确定要清空吗？")) {
+        document.getElementById("postTitle").value = "";
+        document.getElementById("postContent").value = "";
+      }
+    }
+  </script>
+</body>
+</html>
