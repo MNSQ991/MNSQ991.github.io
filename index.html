@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>🐍 贪吃蛇</title>
-  <meta name="description" content="一个可离线、可安装、带最高分记录的贪吃蛇游戏">
+  <title>🐍 贪吃蛇 · 玩家大厅</title>
+  <meta name="description" content="带访问统计、地区识别、在线时长和排行榜的贪吃蛇游戏">
 
-  <!-- PWA 元数据 -->
+  <!-- PWA 设置 -->
   <meta name="theme-color" content="#111">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -17,7 +17,7 @@
   {
     "name": "贪吃蛇游戏",
     "short_name": "贪吃蛇",
-    "description": "经典贪吃蛇，单文件运行",
+    "description": "带排行榜和统计的贪吃蛇",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#111",
@@ -32,6 +32,11 @@
   }
   </script>
 
+  <!-- Cloudflare Web Analytics -->
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+          data-cf-beacon='{"token": "ce8176d5e3c44c9a8b20d9f0e5d6a7b8"}'></script>
+  <!-- ⚠️ 提示：建议替换为你自己的 token（免费注册 Cloudflare 后获取） -->
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -41,12 +46,11 @@
       padding: 10px;
       color: #333;
     }
-    h1 {
-      color: #0074D9;
-      margin: 15px 0;
-    }
+    h1 { color: #0074D9; margin: 15px 0; }
+    h2 { font-size: 1.2em; margin: 10px 0; color: #555; }
+
     #game-container {
-      margin: 20px auto;
+      margin: 15px auto;
       position: relative;
       width: min(95vw, 400px);
       height: min(95vw, 400px);
@@ -55,31 +59,12 @@
       border-radius: 8px;
       overflow: hidden;
     }
-    .snake {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: #0f0;
-      border-radius: 4px;
-    }
-    .snake:first-child {
-      background: #0f8;
-      box-shadow: 0 0 6px rgba(0,255,128,0.8);
-    }
-    .food {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: red;
-      border-radius: 50%;
-      box-shadow: 0 0 8px yellow;
-    }
-    #score {
-      font-size: 18px;
-      margin: 10px;
-    }
+    .snake { position: absolute; width: 20px; height: 20px; background: #0f0; border-radius: 4px; }
+    .snake:first-child { background: #0f8; box-shadow: 0 0 6px rgba(0,255,128,0.8); }
+    .food { position: absolute; width: 20px; height: 20px; background: red; border-radius: 50%; box-shadow: 0 0 8px yellow; }
 
-    /* 虚拟方向键布局 */
+    #score { font-size: 18px; margin: 10px; }
+
     .controls {
       display: grid;
       grid-template-rows: repeat(3, 1fr);
@@ -90,19 +75,41 @@
       margin: 20px auto;
     }
     .ctrl-btn {
-      background: #0074D9;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 24px;
-      cursor: pointer;
-      user-select: none;
+      background: #0074D9; color: white; border: none; border-radius: 8px; font-size: 24px; cursor: pointer;
     }
     .ctrl-btn:active { background: #0056a3; }
     .ctrl-empty { visibility: hidden; }
 
+    button {
+      padding: 10px 20px; font-size: 16px; background: #0074D9; color: white; border: none; border-radius: 5px; margin: 5px; cursor: pointer;
+    }
+
+    .stats {
+      margin: 15px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 0.95em;
+      text-align: left;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .leaderboard {
+      margin: 20px auto;
+      max-width: 400px;
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .leaderboard h3 { color: #333; }
+    .leaderboard ol { text-align: left; margin-left: 20px; }
+
     .footer {
-      margin-top: 20px;
+      margin-top: 30px;
       color: #666;
       font-size: 0.9em;
     }
@@ -115,7 +122,8 @@
 </head>
 <body>
 
-  <h1>🎮 贪吃蛇</h1>
+  <h1>🎮 贪吃蛇 · 玩家大厅</h1>
+  <h2>欢迎来自 🌍 的玩家！</h2>
   <div id="score">得分：0 | 🏆 最高：0</div>
   <div id="game-container"></div>
 
@@ -132,10 +140,24 @@
     <div class="ctrl-empty"></div>
   </div>
 
-  <button onclick="startGame()" style="padding:12px 24px;font-size:16px;">▶️ 开始游戏</button>
+  <button onclick="startGame()">▶️ 开始游戏</button>
+
+  <!-- 统计信息 -->
+  <div class="stats">
+    <p><strong>📊 本地统计</strong></p>
+    <p>🎮 本机游戏次数：<span id="playCount">0</span></p>
+    <p>⏱️ 最长单次在线：<span id="longestTime">0秒</span></p>
+    <p>📍 浏览器地区：系统自动识别中...（依赖 Cloudflare）</p>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="leaderboard">
+    <h3>🏆 本地排行榜（本机记录）</h3>
+    <ol id="rankList"></ol>
+  </div>
 
   <div class="footer">
-    <a href="blog.html">⬅️ 回博客主页</a> | 打开手机浏览器 → 分享 → “添加到主屏幕” 即可安装！
+    <a href="blog.html">⬅️ 回博客主页</a> | 可添加到主屏幕离线游玩！
   </div>
 
   <script>
@@ -154,11 +176,24 @@
     let score = 0;
     let gameInterval;
     let gameRunning = false;
+    let gameStartTime = 0;
+    let playCount = parseInt(localStorage.getItem('snakePlayCount') || '0');
+    let longestTime = parseInt(localStorage.getItem('snakeLongestTime') || '0'); // 秒
     let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
-    updateScore();
+    let leaderboard = JSON.parse(localStorage.getItem('snakeLeaderboard') || '[]');
 
+    // 更新显示
     function updateScore() {
       scoreDisplay.textContent = `得分：${score} | 🏆 最高：${highScore}`;
+      document.getElementById('playCount').textContent = playCount;
+      document.getElementById('longestTime').textContent = formatTime(longestTime);
+    }
+
+    // 格式化时间（秒 → mm:ss）
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${min}分${sec}秒`;
     }
 
     function initGame() {
@@ -168,6 +203,7 @@
       nextDirection = "right";
       score = 0;
       gameRunning = true;
+      gameStartTime = Date.now();
       createFood();
       drawSnake();
       updateScore();
@@ -240,14 +276,42 @@
     function gameOver() {
       clearInterval(gameInterval);
       gameRunning = false;
+
+      const duration = Math.floor((Date.now() - gameStartTime) / 1000);
+      playCount++;
+      localStorage.setItem('snakePlayCount', playCount);
+
+      if (duration > longestTime) {
+        longestTime = duration;
+        localStorage.setItem('snakeLongestTime', longestTime);
+      }
+
       if (score > highScore) {
         highScore = score;
         localStorage.setItem('snakeHighScore', highScore);
-        updateScore();
-        alert(`🎉 新纪录！${score} 分！`);
-      } else {
-        alert(`💥 游戏结束！你得了 ${score} 分`);
       }
+
+      // 加入排行榜
+      const playerName = prompt(`游戏结束！你得了 ${score} 分！\n请输入昵称（可留空）：`, '玩家') || '匿名';
+      leaderboard.push({ name: playerName, score, time: new Date().toLocaleString() });
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 10); // 只保留前10
+      localStorage.setItem('snakeLeaderboard', JSON.stringify(leaderboard));
+
+      updateScore();
+      renderLeaderboard();
+
+      alert(`游戏结束！本次时长：${formatTime(duration)}，得分：${score}`);
+    }
+
+    function renderLeaderboard() {
+      const list = document.getElementById('rankList');
+      list.innerHTML = '';
+      leaderboard.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.name} - ${item.score}分 (${item.time})`;
+        list.appendChild(li);
+      });
     }
 
     function startGame() {
@@ -257,7 +321,7 @@
       gameInterval = setInterval(moveSnake, 150);
     }
 
-    // 设置方向（虚拟按键用）
+    // 设置方向
     window.setDir = (dir) => {
       const opp = { up: 'down', down: 'up', left: 'right', right: 'left' };
       if (direction !== opp[dir]) nextDirection = dir;
@@ -273,31 +337,30 @@
       }
     });
 
-    // 注册 Service Worker（内联，实现离线运行）
+    // 初始化排行榜
+    renderLeaderboard();
+    updateScore();
+
+    // Service Worker（离线支持）
     const swScript = `
       self.addEventListener('install', e => {
-        e.waitUntil(caches.open('snake-game-v1').then(cache => cache.addAll(['/'])));
+        e.waitUntil(caches.open('snake-v2').then(cache => cache.addAll(['/'])));
       });
       self.addEventListener('fetch', e => {
         e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
       });
     `;
-
     if ('serviceWorker' in navigator) {
       const blob = new Blob([swScript], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register(swUrl).then(() => {
-          console.log('Service Worker 已注册，支持离线运行！');
-        }).catch(err => {
-          console.log('SW 注册失败:', err);
-        });
+        navigator.serviceWorker.register(swUrl);
       });
     }
 
     // 初始提示
     setTimeout(() => {
-      alert("🎮 欢迎来到贪吃蛇！\n使用方向键或下方虚拟按键控制\n点击【开始游戏】启动～");
+      alert("🎮 欢迎来到贪吃蛇大厅！\n使用方向键或虚拟按键控制\n游戏结束后可录入昵称进入排行榜！");
     }, 600);
   </script>
 </body>
