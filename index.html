@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>📦 多游戏工具箱 v4.0</title>
+  <title>📦 多游戏工具箱 v5.0</title>
+  <!-- 引入真实 QR 库 -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode.js/lib/qrcode.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -15,7 +17,6 @@
     }
     h1 { color: #0074D9; margin: 20px 0; }
 
-    /* 主菜单 */
     .menu-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -41,7 +42,6 @@
     #qr-btn { background: linear-gradient(135deg, #393, #262); }
     #rps-btn { background: linear-gradient(135deg, #D94F00, #a04000); }
 
-    /* 全屏游戏页 */
     .game-screen {
       display: none;
       position: fixed;
@@ -66,15 +66,15 @@
       cursor: pointer;
     }
 
-    /* 贪吃蛇 */
     #snake-canvas {
       width: 400px; height: 400px;
       margin: 20px auto;
       border: 8px solid #333;
       background: #111;
+      outline: none; /* 可聚焦 */
+      cursor: none;
     }
 
-    /* 猜数字 */
     .guess-section {
       max-width: 500px;
       margin: 30px auto;
@@ -83,7 +83,6 @@
       background: #f8f9fa;
     }
 
-    /* 二维码生成器 */
     #qr-section {
       max-width: 600px;
       margin: 20px auto;
@@ -112,14 +111,16 @@
       cursor: pointer;
     }
     #qr-file-input { display: none; }
-    #qr-canvas {
+
+    #qrcode-container {
       margin: 20px auto;
+      width: 300px;
+      height: 300px;
       border: 1px solid #ddd;
-      padding: 10px;
       background: white;
+      position: relative;
     }
 
-    /* 通用按钮 */
     .start-btn, .action-btn {
       padding: 12px 24px;
       font-size: 18px;
@@ -131,7 +132,6 @@
       margin: 10px;
     }
 
-    /* 结果弹窗 */
     .result-popup {
       position: fixed;
       top: 50%; left: 50%;
@@ -153,17 +153,16 @@
 </head>
 <body>
 
-  <h1>📦 多游戏工具箱 v4.0</h1>
+  <h1>📦 多游戏工具箱 v5.0</h1>
 
-  <!-- 主菜单 -->
   <div class="menu-grid">
     <button class="menu-btn" onclick="goto('snake')">🐍 贪吃蛇</button>
     <button class="menu-btn" onclick="goto('guess')">🔢 猜数字</button>
-    <button class="menu-btn" onclick="goto('qr')">📱 二维码生成器</button>
+    <button class="menu-btn" onclick="goto('qr')">📱 真·二维码生成器</button>
     <button class="menu-btn" onclick="goto('rps')">✊✂️📄 石头剪刀布</button>
   </div>
 
-  <div class="footer">支持离线使用｜方向键控制贪吃蛇</div>
+  <div class="footer">方向键已修复｜二维码真实可用</div>
 
   <!-- ============ 贪吃蛇 ============ -->
   <div id="snake-screen" class="game-screen">
@@ -172,10 +171,10 @@
       <button class="back-btn" onclick="back()">返回</button>
     </div>
     <p>得分：<span id="snake-score">0</span> | 🏆 最高分：<span id="snake-high">0</span></p>
-    <canvas id="snake-canvas" width="400" height="400"></canvas>
+    <canvas id="snake-canvas" width="400" height="400" tabindex="0"></canvas>
     <br/>
     <button class="start-btn" onclick="startSnake()">🎮 开始游戏</button>
-    <p>🎮 使用方向键移动</p>
+    <p style="color:#666;">🎮 使用 ↑↓←→ 方向键控制（点击开始后自动聚焦）</p>
   </div>
 
   <!-- ============ 猜数字 ============ -->
@@ -203,20 +202,20 @@
   <!-- ============ 二维码生成器 ============ -->
   <div id="qr-screen" class="game-screen">
     <div class="game-header">
-      <h2>📱 二维码生成器</h2>
+      <h2>📱 真·二维码生成器</h2>
       <button class="back-btn" onclick="back()">返回</button>
     </div>
     <div id="qr-section">
-      <p>输入文字、链接或上传图片生成二维码：</p>
+      <p>输入文字、链接或上传图片生成真实二维码：</p>
       <textarea id="qr-input" placeholder="输入文本或链接..."></textarea>
 
       <div class="qr-option">
         <button onclick="document.getElementById('qr-file-input').click()">📷 上传图片</button>
         <input type="file" id="qr-file-input" accept="image/*" />
-        <button onclick="generateQR()">🎨 生成二维码</button>
+        <button onclick="generateQR()">✅ 生成二维码</button>
       </div>
 
-      <canvas id="qr-canvas" width="300" height="300"></canvas>
+      <div id="qrcode-container"></div>
       <br/>
       <button class="action-btn" onclick="downloadQR()">💾 下载二维码</button>
     </div>
@@ -244,21 +243,8 @@
     <button onclick="closePopup()">关闭</button>
   </div>
 
-  <!-- QR 图片转 DataURL -->
   <script>
-    function readImageAsDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-  </script>
-
-  <!-- 核心逻辑 -->
-  <script>
-    // ============ 页面跳转 ============
+    // ============ 页面控制 ============
     function goto(screen) {
       document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
       document.getElementById(screen + '-screen').style.display = 'block';
@@ -297,7 +283,10 @@
       createFood();
       draw();
       gameLoop = setInterval(update, 150);
-      window.addEventListener('keydown', handleSnakeKey, true); // 捕获阶段确保监听
+
+      // 🔑 关键：让 canvas 获得焦点并监听
+      canvas.focus();
+      window.addEventListener('keydown', handleKey, true); // 捕获阶段
     }
 
     function createFood() {
@@ -321,6 +310,17 @@
       ctx.fill();
     }
 
+    function handleKey(e) {
+      if (!gameLoop) return; // 游戏未开始不响应
+      e.preventDefault(); // 阻止默认滚动
+
+      const key = e.key;
+      if (key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
+      else if (key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
+      else if (key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
+      else if (key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
+    }
+
     function update() {
       const head = {...snake[0]};
       head.x += dx; head.y += dy;
@@ -341,19 +341,9 @@
       draw();
     }
 
-    function handleSnakeKey(e) {
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
-        e.preventDefault(); // 防止页面滚动
-      }
-      if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
-      if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
-      if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
-      if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
-    }
-
     function gameOver() {
       clearInterval(gameLoop);
-      window.removeEventListener('keydown', handleSnakeKey, true);
+      window.removeEventListener('keydown', handleKey, true);
       if (score > highScore) {
         highScore = score;
         localStorage.setItem('snakeHigh', highScore);
@@ -395,7 +385,6 @@
         document.getElementById('guess-hint').textContent = '📉 太大了，再小一点！';
       }
       input.value = '';
-      input.focus();
     }
 
     function giveUp() {
@@ -404,78 +393,72 @@
     }
 
     // ============ 二维码生成器 ============
-    // 使用纯 JS 实现简易 QR（简化版，实际可用 qrcode.js，这里手写逻辑）
-    function generateQR() {
+    let qrCodeInstance = null;
+
+    async function generateQR() {
       const input = document.getElementById('qr-input').value.trim();
       const fileInput = document.getElementById('qr-file-input');
-      const canvas = document.getElementById('qr-canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, 300, 300);
+      const container = document.getElementById('qrcode-container');
+
+      // 清除旧二维码
+      container.innerHTML = '';
 
       let content = input;
 
-      // 如果上传了图片，转成 Data URL
+      // 如果有图片上传
       if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const imgData = e.target.result;
-          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 300, 300);
-          ctx.font = '14px Arial'; ctx.fillStyle = '#000';
-          ctx.fillText('图片二维码', 100, 30);
-          ctx.fillText('已编码为:', 100, 60);
-          ctx.fillText(file.name, 100, 80);
-          ctx.font = '10px Arial';
-          ctx.fillText(imgData.substring(0, 40) + '...', 100, 100);
-          ctx.fillText('...（数据已编码）', 100, 120);
-          // 实际项目可用 jsQR 或 qrcode.js 编码完整 data URL
-        };
-        reader.readAsDataURL(file);
-        return;
+        try {
+          const file = fileInput.files[0];
+          const dataURL = await readFileAsDataURL(file);
+          content = dataURL; // 图片转 Data URL 放进二维码
+        } catch (err) {
+          showPopup('错误', '图片读取失败');
+          return;
+        }
       }
 
       if (!content) {
-        showPopup('提示', '请输入文字或链接！');
+        showPopup('提示', '请输入内容或上传图片！');
         return;
       }
 
-      // 模拟生成二维码（真实项目建议用 qrcode.js）
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 300, 300);
-      ctx.fillStyle = '#000';
+      // 使用 qrcode.js 生成真实二维码
+      qrCodeInstance = new QRCode(container, {
+        text: content,
+        width: 280,
+        height: 280,
+        colorDark: '#000',
+        colorLight: '#ffffff',
+      });
 
-      // 画边框
-      ctx.strokeRect(10, 10, 280, 280);
+      showPopup('成功', '二维码已生成！可扫码读取内容（如图片会以 data URL 形式编码）');
+    }
 
-      // 画三个定位角（简化模拟）
-      function drawAlign(x, y) {
-        ctx.fillRect(x, y, 50, 50);
-        ctx.fillStyle = '#fff'; ctx.fillRect(x+10, y+10, 30, 30);
-        ctx.fillStyle = '#000'; ctx.fillRect(x+20, y+20, 10, 10);
-      }
-      drawAlign(10, 10);
-      drawAlign(240, 10);
-      drawAlign(10, 240);
-
-      // 填充内容
-      ctx.fillStyle = '#000';
-      ctx.font = '14px Arial';
-      ctx.fillText('二维码内容:', 50, 100);
-      ctx.font = '12px monospace';
-      ctx.fillText(content.length > 30 ? content.substring(0, 30) + '...' : content, 50, 120);
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     function downloadQR() {
-      const canvas = document.getElementById('qr-canvas');
+      const canvas = document.querySelector('#qrcode-container canvas');
+      if (!canvas) {
+        showPopup('提示', '请先生成二维码！');
+        return;
+      }
       const link = document.createElement('a');
       link.download = 'qrcode.png';
-      link.href = canvas.toDataURL();
+      link.href = canvas.toDataURL('image/png');
       link.click();
     }
 
     // 图片上传预览
     document.getElementById('qr-file-input').onchange = function() {
       if (this.files.length > 0) {
-        document.getElementById('qr-input').value = `[已上传图片: ${this.files[0].name}]`;
+        document.getElementById('qr-input').value = `[图片已上传: ${this.files[0].name}]`;
       }
     };
 
