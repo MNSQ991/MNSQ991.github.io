@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>🐍 贪吃蛇</title>
-  <meta name="description" content="一个可安装的贪吃蛇游戏，无需图片，一个文件搞定！">
+  <meta name="description" content="一个可离线、可安装、带最高分记录的贪吃蛇游戏">
 
-  <!-- PWA 设置 -->
+  <!-- PWA 元数据 -->
   <meta name="theme-color" content="#111">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -17,21 +17,15 @@
   {
     "name": "贪吃蛇游戏",
     "short_name": "贪吃蛇",
-    "description": "一个简单的贪吃蛇游戏",
+    "description": "经典贪吃蛇，单文件运行",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#111",
     "theme_color": "#0074D9",
-    "orientation": "portrait",
     "icons": [
       {
-        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23111'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='120' fill='%230f0'>🐍</text></svg>",
+        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23111'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='120' fill='%230f0'>🐍</text></svg>",
         "sizes": "192x192",
-        "type": "image/svg+xml"
-      },
-      {
-        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23111'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='300' fill='%230f0'>🐍</text></svg>",
-        "sizes": "512x512",
         "type": "image/svg+xml"
       }
     ]
@@ -39,40 +33,38 @@
   </script>
 
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #f0f0f0;
-      margin: 0;
+      text-align: center;
       padding: 10px;
-      overscroll-behavior: none;
       color: #333;
     }
     h1 {
       color: #0074D9;
-      margin: 10px 0;
+      margin: 15px 0;
     }
     #game-container {
       margin: 20px auto;
       position: relative;
-      width: min(90vw, 400px);
-      height: min(90vw, 400px);
-      max-width: 400px;
-      max-height: 400px;
+      width: min(95vw, 400px);
+      height: min(95vw, 400px);
       border: 8px solid #333;
       background: #111;
-      touch-action: none;
+      border-radius: 8px;
+      overflow: hidden;
     }
     .snake {
       position: absolute;
       width: 20px;
       height: 20px;
       background: #0f0;
-      border-radius: 5px;
+      border-radius: 4px;
     }
     .snake:first-child {
-      background: #0f0;
-      box-shadow: 0 0 5px rgba(0,255,0,0.8);
+      background: #0f8;
+      box-shadow: 0 0 6px rgba(0,255,128,0.8);
     }
     .food {
       position: absolute;
@@ -86,24 +78,38 @@
       font-size: 18px;
       margin: 10px;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
+
+    /* 虚拟方向键布局 */
+    .controls {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 180px;
+      height: 180px;
+      margin: 20px auto;
+    }
+    .ctrl-btn {
       background: #0074D9;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-size: 24px;
       cursor: pointer;
-      margin: 5px;
+      user-select: none;
     }
+    .ctrl-btn:active { background: #0056a3; }
+    .ctrl-empty { visibility: hidden; }
+
     .footer {
-      margin-top: 30px;
+      margin-top: 20px;
       color: #666;
       font-size: 0.9em;
     }
     .footer a {
       color: #0074D9;
       text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -112,15 +118,28 @@
   <h1>🎮 贪吃蛇</h1>
   <div id="score">得分：0 | 🏆 最高：0</div>
   <div id="game-container"></div>
-  <button onclick="startGame()">▶️ 开始游戏</button>
+
+  <!-- 虚拟方向键 -->
+  <div class="controls">
+    <div class="ctrl-empty"></div>
+    <button class="ctrl-btn" onclick="setDir('up')">⬆️</button>
+    <div class="ctrl-empty"></div>
+    <button class="ctrl-btn" onclick="setDir('left')">⬅️</button>
+    <div class="ctrl-empty"></div>
+    <button class="ctrl-btn" onclick="setDir('right')">➡️</button>
+    <div class="ctrl-empty"></div>
+    <button class="ctrl-btn" onclick="setDir('down')">⬇️</button>
+    <div class="ctrl-empty"></div>
+  </div>
+
+  <button onclick="startGame()" style="padding:12px 24px;font-size:16px;">▶️ 开始游戏</button>
 
   <div class="footer">
-    📱 打开手机浏览器 → 分享 → “添加到主屏幕” 即可安装！<br>
-    <a href="blog.html">⬅️ 回博客</a>
+    <a href="blog.html">⬅️ 回博客主页</a> | 打开手机浏览器 → 分享 → “添加到主屏幕” 即可安装！
   </div>
 
   <script>
-    // 游戏变量
+    // 游戏配置
     const container = document.getElementById("game-container");
     const scoreDisplay = document.getElementById("score");
     const width = 400;
@@ -159,14 +178,14 @@
 
       snake.forEach((part, index) => {
         const el = document.createElement("div");
-        el.classList.add("snake");
+        el.className = "snake";
         el.style.left = part.x * cellSize + "px";
         el.style.top = part.y * cellSize + "px";
         container.appendChild(el);
       });
 
       const foodEl = document.createElement("div");
-      foodEl.classList.add("food");
+      foodEl.className = "food";
       foodEl.style.left = food.x * cellSize + "px";
       foodEl.style.top = food.y * cellSize + "px";
       container.appendChild(foodEl);
@@ -225,9 +244,9 @@
         highScore = score;
         localStorage.setItem('snakeHighScore', highScore);
         updateScore();
-        alert(`🎉 新纪录！${score} 分`);
+        alert(`🎉 新纪录！${score} 分！`);
       } else {
-        alert(`游戏结束！${score} 分`);
+        alert(`💥 游戏结束！你得了 ${score} 分`);
       }
     }
 
@@ -237,6 +256,12 @@
       clearInterval(gameInterval);
       gameInterval = setInterval(moveSnake, 150);
     }
+
+    // 设置方向（虚拟按键用）
+    window.setDir = (dir) => {
+      const opp = { up: 'down', down: 'up', left: 'right', right: 'left' };
+      if (direction !== opp[dir]) nextDirection = dir;
+    };
 
     // 键盘控制
     document.addEventListener("keydown", (e) => {
@@ -248,30 +273,10 @@
       }
     });
 
-    // 触屏控制（虚拟方向键）
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-      const btnStyle = "position:absolute;background:#0074D9;color:white;border:none;border-radius:8px;width:60px;height:60px;";
-      const html = `
-        <button onclick="handleDir('up')" style="${btnStyle}top:10px;left:50%;transform:translateX(-50%);">⬆️</button>
-        <button onclick="handleDir('left')" style="${btnStyle}top:70px;left:20px;">⬅️</button>
-        <button onclick="handleDir('right')" style="${btnStyle}top:70px;right:20px;">➡️</button>
-        <button onclick="handleDir('down')" style="${btnStyle}top:130px;left:50%;transform:translateX(-50%);">⬇️</button>
-      `;
-      const ctrl = document.createElement('div');
-      ctrl.innerHTML = html;
-      ctrl.style.cssText = "position:fixed;bottom:20px;width:100%;pointer-events:none;z-index:100;";
-      document.body.appendChild(ctrl);
-
-      window.handleDir = (dir) => {
-        const opp = {up:'down', down:'up', left:'right', right:'left'};
-        if (direction !== opp[dir]) nextDirection = dir;
-      };
-    }
-
-    // 注册 Service Worker（内联）
+    // 注册 Service Worker（内联，实现离线运行）
     const swScript = `
       self.addEventListener('install', e => {
-        e.waitUntil(caches.open('snake-v1').then(cache => cache.addAll(['/'])));
+        e.waitUntil(caches.open('snake-game-v1').then(cache => cache.addAll(['/'])));
       });
       self.addEventListener('fetch', e => {
         e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
@@ -282,28 +287,18 @@
       const blob = new Blob([swScript], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW 注册失败:', err));
+        navigator.serviceWorker.register(swUrl).then(() => {
+          console.log('Service Worker 已注册，支持离线运行！');
+        }).catch(err => {
+          console.log('SW 注册失败:', err);
+        });
       });
     }
 
-    // PWA 安装提示
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      setTimeout(() => {
-        if (!window.matchMedia('(display-mode: standalone)').matches) {
-          if (confirm('是否将【贪吃蛇】添加到桌面？可离线游玩！')) {
-            deferredPrompt.prompt();
-          }
-        }
-      }, 2000);
-    });
-
     // 初始提示
     setTimeout(() => {
-      alert("🎮 欢迎来到贪吃蛇！\n使用方向键或触屏按钮控制，点击【开始游戏】启动～");
-    }, 500);
+      alert("🎮 欢迎来到贪吃蛇！\n使用方向键或下方虚拟按键控制\n点击【开始游戏】启动～");
+    }, 600);
   </script>
 </body>
 </html>
