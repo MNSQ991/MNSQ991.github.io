@@ -2,33 +2,77 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🎮 贪吃蛇游戏</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>🐍 贪吃蛇</title>
+  <meta name="description" content="一个可安装的贪吃蛇游戏，无需图片，一个文件搞定！">
+
+  <!-- PWA 设置 -->
+  <meta name="theme-color" content="#111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- 内联 manifest.json -->
+  <script type="application/ld+json">
+  {
+    "name": "贪吃蛇游戏",
+    "short_name": "贪吃蛇",
+    "description": "一个简单的贪吃蛇游戏",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#111",
+    "theme_color": "#0074D9",
+    "orientation": "portrait",
+    "icons": [
+      {
+        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23111'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='120' fill='%230f0'>🐍</text></svg>",
+        "sizes": "192x192",
+        "type": "image/svg+xml"
+      },
+      {
+        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23111'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='300' fill='%230f0'>🐍</text></svg>",
+        "sizes": "512x512",
+        "type": "image/svg+xml"
+      }
+    ]
+  }
+  </script>
+
   <style>
     body {
       font-family: 'Arial', sans-serif;
       text-align: center;
       background: #f0f0f0;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
+      overscroll-behavior: none;
+      color: #333;
     }
     h1 {
-      color: #2c3e50;
+      color: #0074D9;
+      margin: 10px 0;
     }
     #game-container {
       margin: 20px auto;
       position: relative;
-      width: 400px;
-      height: 400px;
-      border: 10px solid #333;
+      width: min(90vw, 400px);
+      height: min(90vw, 400px);
+      max-width: 400px;
+      max-height: 400px;
+      border: 8px solid #333;
       background: #111;
+      touch-action: none;
     }
     .snake {
       position: absolute;
       width: 20px;
       height: 20px;
-      background: lime;
+      background: #0f0;
       border-radius: 5px;
+    }
+    .snake:first-child {
+      background: #0f0;
+      box-shadow: 0 0 5px rgba(0,255,0,0.8);
     }
     .food {
       position: absolute;
@@ -36,9 +80,10 @@
       height: 20px;
       background: red;
       border-radius: 50%;
+      box-shadow: 0 0 8px yellow;
     }
     #score {
-      font-size: 24px;
+      font-size: 18px;
       margin: 10px;
     }
     button {
@@ -49,14 +94,12 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      margin: 10px;
-    }
-    button:hover {
-      background: #0056a3;
+      margin: 5px;
     }
     .footer {
       margin-top: 30px;
       color: #666;
+      font-size: 0.9em;
     }
     .footer a {
       color: #0074D9;
@@ -66,17 +109,18 @@
 </head>
 <body>
 
-  <h1>🐍 贪吃蛇游戏</h1>
-  <div id="score">得分：0</div>
+  <h1>🎮 贪吃蛇</h1>
+  <div id="score">得分：0 | 🏆 最高：0</div>
   <div id="game-container"></div>
-  <button onclick="startGame()">开始游戏</button>
-  <button onclick="location.href='#'">刷新重来</button>
+  <button onclick="startGame()">▶️ 开始游戏</button>
 
   <div class="footer">
-    <p>🎮 使用方向键控制蛇移动 | <a href="blog.html">回到我的博客主页</a></p>
+    📱 打开手机浏览器 → 分享 → “添加到主屏幕” 即可安装！<br>
+    <a href="blog.html">⬅️ 回博客</a>
   </div>
 
   <script>
+    // 游戏变量
     const container = document.getElementById("game-container");
     const scoreDisplay = document.getElementById("score");
     const width = 400;
@@ -91,45 +135,41 @@
     let score = 0;
     let gameInterval;
     let gameRunning = false;
+    let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
+    updateScore();
+
+    function updateScore() {
+      scoreDisplay.textContent = `得分：${score} | 🏆 最高：${highScore}`;
+    }
 
     function initGame() {
-      // 清除上一局
       container.innerHTML = "";
       snake = [{ x: 10, y: 10 }];
       direction = "right";
       nextDirection = "right";
       score = 0;
-      scoreDisplay.textContent = "得分：" + score;
       gameRunning = true;
-
-      // 创建食物
       createFood();
-
-      // 绘制蛇
       drawSnake();
+      updateScore();
     }
 
     function drawSnake() {
-      // 清空蛇
-      document.querySelectorAll(".snake").forEach(el => el.remove());
-      document.querySelectorAll(".food").forEach(el => el.remove());
+      document.querySelectorAll(".snake, .food").forEach(el => el.remove());
 
-      // 画蛇
       snake.forEach((part, index) => {
-        const snakeElement = document.createElement("div");
-        snakeElement.classList.add("snake");
-        snakeElement.style.left = part.x * cellSize + "px";
-        snakeElement.style.top = part.y * cellSize + "px";
-        if (index === 0) snakeElement.style.background = "#0f0"; // 头部亮一点
-        container.appendChild(snakeElement);
+        const el = document.createElement("div");
+        el.classList.add("snake");
+        el.style.left = part.x * cellSize + "px";
+        el.style.top = part.y * cellSize + "px";
+        container.appendChild(el);
       });
 
-      // 画食物
-      const foodElement = document.createElement("div");
-      foodElement.classList.add("food");
-      foodElement.style.left = food.x * cellSize + "px";
-      foodElement.style.top = food.y * cellSize + "px";
-      container.appendChild(foodElement);
+      const foodEl = document.createElement("div");
+      foodEl.classList.add("food");
+      foodEl.style.left = food.x * cellSize + "px";
+      foodEl.style.top = food.y * cellSize + "px";
+      container.appendChild(foodEl);
     }
 
     function createFood() {
@@ -137,12 +177,8 @@
         x: Math.floor(Math.random() * cols),
         y: Math.floor(Math.random() * rows)
       };
-
-      // 避免食物生成在蛇身上
-      for (let part of snake) {
-        if (part.x === food.x && part.y === food.y) {
-          return createFood();
-        }
+      if (snake.some(part => part.x === food.x && part.y === food.y)) {
+        return createFood();
       }
     }
 
@@ -157,28 +193,26 @@
         case "right": head.x++; break;
       }
 
-      // 撞墙检测
+      // 撞墙
       if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows) {
         gameOver();
         return;
       }
 
       // 撞自己
-      if (snake.some(part => part.x === head.x && part.y === head.y)) {
+      if (snake.some((part, i) => i > 0 && part.x === head.x && part.y === head.y)) {
         gameOver();
         return;
       }
 
-      // 插入新头
       snake.unshift(head);
 
-      // 吃到食物
       if (head.x === food.x && head.y === food.y) {
         score += 10;
-        scoreDisplay.textContent = "得分：" + score;
+        updateScore();
         createFood();
       } else {
-        snake.pop(); // 没吃到就删尾
+        snake.pop();
       }
 
       drawSnake();
@@ -187,40 +221,89 @@
     function gameOver() {
       clearInterval(gameInterval);
       gameRunning = false;
-      alert("游戏结束！你的得分：" + score);
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('snakeHighScore', highScore);
+        updateScore();
+        alert(`🎉 新纪录！${score} 分`);
+      } else {
+        alert(`游戏结束！${score} 分`);
+      }
     }
 
     function startGame() {
       if (gameRunning) return;
       initGame();
       clearInterval(gameInterval);
-      gameInterval = setInterval(moveSnake, 150); // 控制速度
+      gameInterval = setInterval(moveSnake, 150);
     }
 
     // 键盘控制
     document.addEventListener("keydown", (e) => {
       switch (e.key) {
-        case "ArrowUp":
-          if (direction !== "down") nextDirection = "up";
-          e.preventDefault();
-          break;
-        case "ArrowDown":
-          if (direction !== "up") nextDirection = "down";
-          e.preventDefault();
-          break;
-        case "ArrowLeft":
-          if (direction !== "right") nextDirection = "left";
-          e.preventDefault();
-          break;
-        case "ArrowRight":
-          if (direction !== "left") nextDirection = "right";
-          e.preventDefault();
-          break;
+        case "ArrowUp": if (direction !== "down") nextDirection = "up"; e.preventDefault(); break;
+        case "ArrowDown": if (direction !== "up") nextDirection = "down"; e.preventDefault(); break;
+        case "ArrowLeft": if (direction !== "right") nextDirection = "left"; e.preventDefault(); break;
+        case "ArrowRight": if (direction !== "left") nextDirection = "right"; e.preventDefault(); break;
       }
     });
 
+    // 触屏控制（虚拟方向键）
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      const btnStyle = "position:absolute;background:#0074D9;color:white;border:none;border-radius:8px;width:60px;height:60px;";
+      const html = `
+        <button onclick="handleDir('up')" style="${btnStyle}top:10px;left:50%;transform:translateX(-50%);">⬆️</button>
+        <button onclick="handleDir('left')" style="${btnStyle}top:70px;left:20px;">⬅️</button>
+        <button onclick="handleDir('right')" style="${btnStyle}top:70px;right:20px;">➡️</button>
+        <button onclick="handleDir('down')" style="${btnStyle}top:130px;left:50%;transform:translateX(-50%);">⬇️</button>
+      `;
+      const ctrl = document.createElement('div');
+      ctrl.innerHTML = html;
+      ctrl.style.cssText = "position:fixed;bottom:20px;width:100%;pointer-events:none;z-index:100;";
+      document.body.appendChild(ctrl);
+
+      window.handleDir = (dir) => {
+        const opp = {up:'down', down:'up', left:'right', right:'left'};
+        if (direction !== opp[dir]) nextDirection = dir;
+      };
+    }
+
+    // 注册 Service Worker（内联）
+    const swScript = `
+      self.addEventListener('install', e => {
+        e.waitUntil(caches.open('snake-v1').then(cache => cache.addAll(['/'])));
+      });
+      self.addEventListener('fetch', e => {
+        e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+      });
+    `;
+
+    if ('serviceWorker' in navigator) {
+      const blob = new Blob([swScript], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW 注册失败:', err));
+      });
+    }
+
+    // PWA 安装提示
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      setTimeout(() => {
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+          if (confirm('是否将【贪吃蛇】添加到桌面？可离线游玩！')) {
+            deferredPrompt.prompt();
+          }
+        }
+      }, 2000);
+    });
+
     // 初始提示
-    alert("🎮 欢迎来到贪吃蛇！\n使用方向键控制，点击【开始游戏】启动～");
+    setTimeout(() => {
+      alert("🎮 欢迎来到贪吃蛇！\n使用方向键或触屏按钮控制，点击【开始游戏】启动～");
+    }, 500);
   </script>
 </body>
 </html>
