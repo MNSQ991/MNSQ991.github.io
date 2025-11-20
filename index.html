@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>🐍 贪吃蛇 · 带摄像头监控</title>
-  <meta name="description" content="贪吃蛇游戏 + 远程摄像头查看">
+  <title>🎮 多游戏大厅</title>
+  <meta name="description" content="贪吃蛇 | 五子棋 | 猜数字">
 
   <!-- PWA 设置 -->
   <meta name="theme-color" content="#111">
@@ -25,82 +25,134 @@
       padding: 10px;
       color: #333;
     }
-    h1 { color: #0074D9; margin: 15px 0; }
-    h2 { font-size: 1.2em; margin: 10px 0; color: #555; }
 
-    #game-container {
-      margin: 15px auto;
-      position: relative;
-      width: min(95vw, 400px);
-      height: min(95vw, 400px);
+    h1 {
+      color: #0074D9;
+      margin: 15px 0;
+    }
+
+    /* 主菜单网格 */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    .menu-btn {
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .menu-btn:hover {
+      transform: scale(1.05);
+    }
+    .menu-btn:active {
+      transform: scale(0.98);
+    }
+
+    #snake-btn { background: linear-gradient(135deg, #0074D9, #0056a3); }
+    #gobang-btn { background: linear-gradient(135deg, #393, #262); }
+    #guess-btn { background: linear-gradient(135deg, #D9534F, #a0302a); }
+
+    /* 游戏容器 */
+    .game-container {
+      display: none;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .game-header h2 {
+      color: #0074D9;
+    }
+    .back-btn {
+      background: #ccc;
+      color: #333;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* 贪吃蛇样式 */
+    #snake-game {
+      width: 400px;
+      height: 400px;
+      margin: 0 auto;
       border: 8px solid #333;
       background: #111;
-      border-radius: 8px;
-      overflow: hidden;
+      position: relative;
     }
-    .snake { position: absolute; width: 20px; height: 20px; background: #0f0; border-radius: 4px; }
-    .snake:first-child { background: #0f8; box-shadow: 0 0 6px rgba(0,255,128,0.8); }
+    .snake-part { position: absolute; width: 20px; height: 20px; background: #0f0; border-radius: 4px; }
+    .snake-part:first-child { background: #0f8; box-shadow: 0 0 6px #0f8; }
     .food { position: absolute; width: 20px; height: 20px; background: red; border-radius: 50%; box-shadow: 0 0 8px yellow; }
 
-    #score { font-size: 18px; margin: 10px; }
-
-    .controls {
-      display: grid;
-      grid-template-rows: repeat(3, 1fr);
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      width: 180px;
-      height: 180px;
+    /* 五子棋样式 */
+    #gobang-board {
+      width: 400px;
+      height: 400px;
       margin: 20px auto;
+      background: #e8c497;
+      border: 6px solid #8b4513;
+      position: relative;
     }
-    .ctrl-btn {
-      background: #0074D9; color: white; border: none; border-radius: 8px; font-size: 24px; cursor: pointer;
+    .gobang-line {
+      position: absolute;
+      background: #333;
     }
-    .ctrl-btn:active { background: #0056a3; }
-    .ctrl-empty { visibility: hidden; }
+    .gobang-row { height: 1px; width: 380px; top: calc((var(--y) * 40px) + 10px); left: 10px; }
+    .gobang-col { width: 1px; height: 380px; left: calc((var(--x) * 40px) + 10px); top: 10px; }
+    .stone {
+      position: absolute;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      transform: translateY(-50%);
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    .black { background: #111; top: calc((var(--y) * 40px) + 10px + 17px); left: calc((var(--x) * 40px) + 10px + 17px); }
+    .white { background: #fff; top: calc((var(--y) * 40px) + 10px + 17px); left: calc((var(--x) * 40px) + 10px + 17px); }
 
-    button {
-      padding: 10px 20px; font-size: 16px; background: #0074D9; color: white; border: none; border-radius: 5px; margin: 5px; cursor: pointer;
+    /* 猜数字样式 */
+    #guess-input {
+      padding: 10px;
+      font-size: 18px;
+      margin: 10px;
+      width: 150px;
     }
-
-    .stats {
+    #guess-log {
+      text-align: left;
       margin: 15px auto;
       padding: 10px;
-      background: #fff;
-      border-radius: 8px;
-      font-size: 0.95em;
-      text-align: left;
-      max-width: 400px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    /* 摄像头模块 */
-    #camera-section {
-      margin: 20px auto;
-      max-width: 400px;
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    #camera-input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
+      background: #f5f5f5;
       border-radius: 5px;
-      font-size: 16px;
-    }
-    #camera-feed {
-      width: 100%;
-      max-height: 300px;
-      margin-top: 10px;
-      border-radius: 5px;
-      display: none;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 14px;
     }
 
     .footer {
-      margin-top: 30px;
+      margin-top: 40px;
       color: #666;
       font-size: 0.9em;
     }
@@ -113,41 +165,52 @@
 </head>
 <body>
 
-  <h1>🎮 贪吃蛇 · 带摄像头监控</h1>
-  <h2>欢迎来自 🌍 的玩家！</h2>
-  <div id="score">得分：0 | 🏆 最高：0</div>
-  <div id="game-container"></div>
+  <h1>🎮 多游戏大厅</h1>
 
-  <!-- 虚拟方向键 -->
-  <div class="controls">
-    <div class="ctrl-empty"></div>
-    <button class="ctrl-btn" onclick="setDir('up')">⬆️</button>
-    <div class="ctrl-empty"></div>
-    <button class="ctrl-btn" onclick="setDir('left')">⬅️</button>
-    <div class="ctrl-empty"></div>
-    <button class="ctrl-btn" onclick="setDir('right')">➡️</button>
-    <div class="ctrl-empty"></div>
-    <button class="ctrl-btn" onclick="setDir('down')">⬇️</button>
-    <div class="ctrl-empty"></div>
+  <!-- 主菜单 -->
+  <div class="menu-grid">
+    <button class="menu-btn" onclick="showGame('snake')">🐍 贪吃蛇</button>
+    <button class="menu-btn" onclick="showGame('gobang')">⚫ 五子棋</button>
+    <button class="menu-btn" style="grid-column: span 2;" onclick="showGame('guess')"> 🔢 猜数字</button>
   </div>
 
-  <button onclick="startGame()">▶️ 开始游戏</button>
-
-  <!-- 统计信息 -->
-  <div class="stats">
-    <p><strong>📊 本地统计</strong></p>
-    <p>🎮 本机游戏次数：<span id="playCount">0</span></p>
-    <p>⏱️ 最长单次在线：<span id="longestTime">0秒</span></p>
-    <p>📍 浏览器地区：系统自动识别中...（依赖 Cloudflare）</p>
+  <!-- 贪吃蛇游戏 -->
+  <div id="snake-screen" class="game-container">
+    <div class="game-header">
+      <h2>🐍 贪吃蛇</h2>
+      <button class="back-btn" onclick="backToMenu()">返回</button>
+    </div>
+    <div id="snake-game"></div>
+    <div>得分：<span id="snake-score">0</span></div>
+    <div style="margin: 10px;">
+      <button onclick="setSnakeDir('up')">⬆️</button><br/>
+      <button onclick="setSnakeDir('left')">⬅️</button>
+      <button onclick="setSnakeDir('right')">➡️</button><br/>
+      <button onclick="setSnakeDir('down')">⬇️</button>
+    </div>
   </div>
 
-  <!-- 摄像头查看器 -->
-  <div id="camera-section">
-    <h3>📹 查看摄像头</h3>
-    <p>输入摄像头地址（如 http://192.168.1.100:8080/video）</p>
-    <input type="text" id="camera-input" placeholder="请输入摄像头视频流地址（HTTP/RTSP）" />
-    <button onclick="connectCamera()">🔗 连接摄像头</button>
-    <image id="camera-feed" alt="摄像头画面" />
+  <!-- 五子棋游戏 -->
+  <div id="gobang-screen" class="game-container">
+    <div class="game-header">
+      <h2>⚫ 五子棋</h2>
+      <button class="back-btn" onclick="backToMenu()">返回</button>
+    </div>
+    <div>当前玩家：<span id="gobang-player" style="color: #111;">黑子</span></div>
+    <div id="gobang-board"></div>
+    <button onclick="resetGobang()">🔄 重新开始</button>
+  </div>
+
+  <!-- 猜数字游戏 -->
+  <div id="guess-screen" class="game-container">
+    <div class="game-header">
+      <h2>🔢 猜数字</h2>
+      <button class="back-btn" onclick="backToMenu()">返回</button>
+    </div>
+    <p>我想到一个 1-100 的数字，你来猜！</p>
+    <input type="number" id="guess-input" min="1" max="100" />
+    <button onclick="checkGuess()">提交</button>
+    <div id="guess-log"></div>
   </div>
 
   <div class="footer">
@@ -155,191 +218,217 @@
   </div>
 
   <script>
-    // ========== 贪吃蛇游戏逻辑（原样保留）==========
-    const container = document.getElementById("game-container");
-    const scoreDisplay = document.getElementById("score");
-    const width = 400;
-    const cellSize = 20;
-    const cols = width / cellSize;
-    const rows = width / cellSize;
-
-    let snake = [];
-    let food = {};
-    let direction = "right";
-    let nextDirection = "right";
-    let score = 0;
-    let gameInterval;
-    let gameRunning = false;
-    let gameStartTime = 0;
-    let playCount = parseInt(localStorage.getItem('snakePlayCount') || '0');
-    let longestTime = parseInt(localStorage.getItem('snakeLongestTime') || '0');
-    let highScore = parseInt(localStorage.getItem('snakeHighScore') || '0');
-
-    function updateScore() {
-      scoreDisplay.textContent = `得分：${score} | 🏆 最高：${highScore}`;
-      document.getElementById('playCount').textContent = playCount;
-      document.getElementById('longestTime').textContent = formatTime(longestTime);
+    // ============ 全局函数 ============
+    function showGame(gameId) {
+      document.querySelectorAll('.game-container').forEach(el => el.style.display = 'none');
+      document.getElementById(gameId + '-screen').style.display = 'block';
+      if (gameId === 'snake') initSnake();
+      if (gameId === 'gobang') initGobang();
+      if (gameId === 'guess') initGuess();
     }
 
-    function formatTime(seconds) {
-      const min = Math.floor(seconds / 60);
-      const sec = seconds % 60;
-      return `${min}分${sec}秒`;
+    function backToMenu() {
+      document.querySelectorAll('.game-container').forEach(el => el.style.display = 'none');
     }
 
-    function initGame() {
-      container.innerHTML = "";
-      snake = [{ x: 10, y: 10 }];
-      direction = "right";
-      nextDirection = "right";
-      score = 0;
-      gameRunning = true;
-      gameStartTime = Date.now();
-      createFood();
+    // ============ 贪吃蛇 ============
+    let snake = [], food = {}, direction = 'right', nextDir = 'right';
+    let snakeScore = 0, snakeInterval;
+
+    function initSnake() {
+      const game = document.getElementById('snake-game');
+      game.innerHTML = '';
+      snake = [{x: 10, y: 10}];
+      direction = 'right'; nextDir = 'right';
+      snakeScore = 0;
+      document.getElementById('snake-score').textContent = 0;
+      createSnakeFood();
       drawSnake();
-      updateScore();
+      clearInterval(snakeInterval);
+      snakeInterval = setInterval(moveSnake, 150);
+    }
+
+    function createSnakeFood() {
+      food = {
+        x: Math.floor(Math.random() * 20),
+        y: Math.floor(Math.random() * 20)
+      };
     }
 
     function drawSnake() {
-      document.querySelectorAll(".snake, .food").forEach(el => el.remove());
-
-      snake.forEach((part, index) => {
-        const el = document.createElement("div");
-        el.className = "snake";
-        el.style.left = part.x * cellSize + "px";
-        el.style.top = part.y * cellSize + "px";
-        container.appendChild(el);
+      document.querySelectorAll('.snake-part, .food').forEach(el => el.remove());
+      snake.forEach((part, i) => {
+        const el = document.createElement('div');
+        el.className = 'snake-part';
+        el.style.left = part.x * 20 + 'px';
+        el.style.top = part.y * 20 + 'px';
+        document.getElementById('snake-game').appendChild(el);
       });
-
-      const foodEl = document.createElement("div");
-      foodEl.className = "food";
-      foodEl.style.left = food.x * cellSize + "px";
-      foodEl.style.top = food.y * cellSize + "px";
-      container.appendChild(foodEl);
-    }
-
-    function createFood() {
-      food = {
-        x: Math.floor(Math.random() * cols),
-        y: Math.floor(Math.random() * rows)
-      };
-      if (snake.some(part => part.x === food.x && part.y === food.y)) {
-        return createFood();
-      }
+      const f = document.createElement('div');
+      f.className = 'food';
+      f.style.left = food.x * 20 + 'px';
+      f.style.top = food.y * 20 + 'px';
+      document.getElementById('snake-game').appendChild(f);
     }
 
     function moveSnake() {
-      direction = nextDirection;
-      const head = { ...snake[0] };
-
+      direction = nextDir;
+      const head = {...snake[0]};
       switch (direction) {
-        case "up": head.y--; break;
-        case "down": head.y++; break;
-        case "left": head.x--; break;
-        case "right": head.x++; break;
+        case 'up': head.y--; break;
+        case 'down': head.y++; break;
+        case 'left': head.x--; break;
+        case 'right': head.x++; break;
       }
-
-      if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows) {
-        gameOver();
-        return;
-      }
-
-      if (snake.some((part, i) => i > 0 && part.x === head.x && part.y === head.y)) {
-        gameOver();
-        return;
-      }
-
+      if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) return gameOver();
+      if (snake.some((p, i) => i > 0 && p.x === head.x && p.y === head.y)) return gameOver();
       snake.unshift(head);
-
       if (head.x === food.x && head.y === food.y) {
-        score += 10;
-        updateScore();
-        createFood();
+        snakeScore += 10;
+        document.getElementById('snake-score').textContent = snakeScore;
+        createSnakeFood();
       } else {
         snake.pop();
       }
-
       drawSnake();
     }
 
+    function setSnakeDir(dir) {
+      const opp = {up:'down', down:'up', left:'right', right:'left'};
+      if (direction !== opp[dir]) nextDir = dir;
+    }
+
     function gameOver() {
-      clearInterval(gameInterval);
-      gameRunning = false;
-
-      const duration = Math.floor((Date.now() - gameStartTime) / 1000);
-      playCount++;
-      localStorage.setItem('snakePlayCount', playCount);
-
-      if (duration > longestTime) {
-        longestTime = duration;
-        localStorage.setItem('snakeLongestTime', longestTime);
-      }
-
-      if (score > highScore) {
-        highScore = score;
-        localStorage.setItem('snakeHighScore', highScore);
-      }
-
-      updateScore();
-      alert(`游戏结束！本次时长：${formatTime(duration)}，得分：${score}`);
+      clearInterval(snakeInterval);
+      alert('游戏结束！得分：' + snakeScore);
+      backToMenu();
     }
 
-    function startGame() {
-      if (gameRunning) return;
-      initGame();
-      clearInterval(gameInterval);
-      gameInterval = setInterval(moveSnake, 150);
+    // ============ 五子棋 ============
+    let gobangBoard = Array(15).fill().map(() => Array(15).fill(0)); // 0:空, 1:黑, 2:白
+    let currentPlayer = 1;
+
+    function initGobang() {
+      const board = document.getElementById('gobang-board');
+      board.innerHTML = '';
+      // 画线
+      for (let i = 0; i < 15; i++) {
+        const row = document.createElement('div');
+        row.className = 'gobang-line gobang-row';
+        row.style.setProperty('--y', i);
+        board.appendChild(row);
+        const col = document.createElement('div');
+        col.className = 'gobang-line gobang-col';
+        col.style.setProperty('--x', i);
+        board.appendChild(col);
+      }
+      // 重置
+      gobangBoard = Array(15).fill().map(() => Array(15).fill(0));
+      currentPlayer = 1;
+      document.getElementById('gobang-player').textContent = '黑子';
+      document.getElementById('gobang-player').style.color = '#111';
+      board.onclick = placeStone;
     }
 
-    window.setDir = (dir) => {
-      const opp = { up: 'down', down: 'up', left: 'right', right: 'left' };
-      if (direction !== opp[dir]) nextDirection = dir;
-    };
+    function placeStone(e) {
+      const rect = this.getBoundingClientRect();
+      const x = Math.round((e.clientX - rect.left - 10) / 40);
+      const y = Math.round((e.clientY - rect.top - 10) / 40);
+      if (x < 0 || x > 14 || y < 0 || y > 14 || gobangBoard[y][x] !== 0) return;
 
-    document.addEventListener("keydown", (e) => {
-      switch (e.key) {
-        case "ArrowUp": if (direction !== "down") nextDirection = "up"; e.preventDefault(); break;
-        case "ArrowDown": if (direction !== "up") nextDirection = "down"; e.preventDefault(); break;
-        case "ArrowLeft": if (direction !== "right") nextDirection = "left"; e.preventDefault(); break;
-        case "ArrowRight": if (direction !== "left") nextDirection = "right"; e.preventDefault(); break;
-      }
-    });
+      gobangBoard[y][x] = currentPlayer;
+      const stone = document.createElement('div');
+      stone.className = 'stone ' + (currentPlayer === 1 ? 'black' : 'white');
+      stone.style.setProperty('--x', x);
+      stone.style.setProperty('--y', y);
+      this.appendChild(stone);
 
-    updateScore();
-
-    // ========== 摄像头查看器模块 ==========
-    const cameraInput = document.getElementById('camera-input');
-    const cameraFeed = document.getElementById('camera-feed');
-
-    function connectCamera() {
-      const url = cameraInput.value.trim();
-      if (!url) {
-        alert('请输入摄像头地址！');
+      if (checkWin(x, y, currentPlayer)) {
+        setTimeout(() => {
+          alert(`${currentPlayer === 1 ? '黑子' : '白子'} 获胜！`);
+          resetGobang();
+        }, 100);
         return;
       }
 
-      // 尝试加载图片流（适用于 MJPEG 或静态快照）
-      cameraFeed.src = url;
-      cameraFeed.style.display = 'block';
-      cameraFeed.onload = () => {
-        alert('✅ 已连接摄像头！画面正在加载...');
-      };
-      cameraFeed.onerror = () => {
-        alert('❌ 无法连接摄像头，请检查地址是否正确。\n常见问题：跨域、协议不支持、摄像头未开启。');
-        cameraFeed.style.display = 'none';
-      };
+      currentPlayer = 3 - currentPlayer; // 1→2, 2→1
+      document.getElementById('gobang-player').textContent = currentPlayer === 1 ? '黑子' : '白子';
+      document.getElementById('gobang-player').style.color = currentPlayer === 1 ? '#111' : '#fff';
     }
 
-    // Service Worker（离线支持）
-    const swScript = `
-      self.addEventListener('install', e => {
-        e.waitUntil(caches.open('snake-v3').then(cache => cache.addAll(['/'])));
-      });
-      self.addEventListener('fetch', e => {
-        e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-      });
-    `;
+    function checkWin(x, y, player) {
+      const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+      for (let [dx, dy] of dirs) {
+        let count = 1;
+        for (let i = 1; i < 5; i++) {
+          if (gobangBoard[y + dy*i]?.[x + dx*i] === player) count++;
+          else break;
+        }
+        for (let i = 1; i < 5; i++) {
+          if (gobangBoard[y - dy*i]?.[x - dx*i] === player) count++;
+          else break;
+        }
+        if (count >= 5) return true;
+      }
+      return false;
+    }
+
+    function resetGobang() {
+      initGobang();
+    }
+
+    // ============ 猜数字 ============
+    let targetNumber, guessCount, guessLog;
+
+    function initGuess() {
+      targetNumber = Math.floor(Math.random() * 100) + 1;
+      guessCount = 0;
+      guessLog = [];
+      document.getElementById('guess-log').innerHTML = '';
+    }
+
+    function checkGuess() {
+      const input = document.getElementById('guess-input');
+      const guess = parseInt(input.value);
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        alert('请输入 1-100 的数字！');
+        return;
+      }
+      guessCount++;
+      if (guess === targetNumber) {
+        const msg = `🎉 恭喜！你猜对了！答案是 ${targetNumber}，共用了 ${guessCount} 次。`;
+        addLog(msg, 'green');
+        setTimeout(() => {
+          alert(msg);
+          backToMenu();
+        }, 500);
+      } else if (guess > targetNumber) {
+        addLog(`${guess} — 太大了！`, 'orange');
+      } else {
+        addLog(`${guess} — 太小了！`, 'blue');
+      }
+      input.value = '';
+    }
+
+    function addLog(text, color) {
+      const log = document.getElementById('guess-log');
+      const p = document.createElement('p');
+      p.textContent = text;
+      p.style.color = color;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // ============ Service Worker ============
     if ('serviceWorker' in navigator) {
+      const swScript = `
+        self.addEventListener('install', e => {
+          e.waitUntil(caches.open('games-v1').then(cache => cache.addAll(['/'])));
+        });
+        self.addEventListener('fetch', e => {
+          e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+        });
+      `;
       const blob = new Blob([swScript], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
       window.addEventListener('load', () => {
@@ -349,7 +438,7 @@
 
     // 初始提示
     setTimeout(() => {
-      alert("🎮 欢迎来到贪吃蛇大厅！\n使用方向键或虚拟按键控制\n下方可连接摄像头查看实时画面！");
+      alert("🎮 欢迎来到多游戏大厅！\n点击按钮进入游戏，支持离线游玩！");
     }, 600);
   </script>
 </body>
