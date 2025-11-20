@@ -1,31 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>我的博客</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-    h1 { color: #2c3e50; }
-    .post { margin-bottom: 30px; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-    .date { color: #7f8c8d; font-size: 0.9em; }
-    a { color: #3498db; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+    h1, h2 { color: #333; }
+    .post { border-bottom: 1px solid #eee; padding: 20px 0; }
+    .comment { background: #f9f9f9; padding: 10px 15px; margin: 10px 0; border-radius: 5px; font-size: 0.9em; }
+    textarea, input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #0074D9; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056a3; }
   </style>
 </head>
 <body>
-  <h1>📝 我的博客</h1>
 
-  {% for post in site.posts %}
+  <h1>📝 我的 GitHub 博客</h1>
+  <p>欢迎来到我的小天地！</p>
+
+  <!-- 发表新文章 -->
+  <div style="margin-top: 40px;">
+    <h2>✍️ 写一篇文章</h2>
+    <input type="text" id="postTitle" placeholder="输入标题" />
+    <textarea id="postContent" rows="5" placeholder="写下你的想法..."></textarea>
+    <button onclick="addPost()">发布文章</button>
+  </div>
+
+  <!-- 文章列表 -->
+  <div id="postsContainer">
+    <!-- 示例文章 -->
     <div class="post">
-      <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
-      <p class="date">{{ post.date | date: "%Y年%m月%d日" }}</p>
-      <p>{{ post.excerpt | strip_html | truncate: 100 }}</p>
-    </div>
-  {% endfor %}
+      <h3>第一篇：今天开始学编程</h3>
+      <p>这是我在 GitHub 上写的第一个网页，感觉超有成就感！🎉</p>
+      <small>📅 2025-11-20</small>
 
-  <footer>
-    <p>Powered by GitHub Pages 💙</p>
-  </footer>
+      <!-- 评论区 -->
+      <div style="margin-top: 20px;">
+        <h4>💬 评论</h4>
+        <textarea id="commentInput_0" placeholder="说点什么吧..." rows="3"></textarea>
+        <button onclick="addComment(0)">发表评论</button>
+
+        <!-- 显示评论 -->
+        <div id="comments_0">
+          <div class="comment">好厉害呀，加油！ —— 小明</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 模拟文章数据
+    let posts = [
+      { title: "第一篇：今天开始学编程", content: "这是我在 GitHub 上写的第一个网页，感觉超有成就感！🎉", comments: ["好厉害呀，加油！ —— 小明"] }
+    ];
+
+    // 添加新文章
+    function addPost() {
+      const title = document.getElementById("postTitle").value.trim();
+      const content = document.getElementById("postContent").value.trim();
+
+      if (!title || !content) {
+        alert("标题和内容不能为空！");
+        return;
+      }
+
+      const newPost = { title, content, comments: [] };
+      posts.push(newPost);
+      renderPosts(); // 重新渲染所有文章
+
+      // 清空输入框
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "";
+    }
+
+    // 添加评论
+    function addComment(postIndex) {
+      const commentInputId = `commentInput_${postIndex}`;
+      const commentText = document.getElementById(commentInputId).value.trim();
+
+      if (!commentText) {
+        alert("评论不能为空！");
+        return;
+      }
+
+      posts[postIndex].comments.push(commentText + " —— 匿名网友");
+      renderPosts(); // 重新渲染
+    }
+
+    // 重新生成所有文章（包括评论）
+    function renderPosts() {
+      const container = document.getElementById("postsContainer");
+      let html = "";
+
+      posts.forEach((post, index) => {
+        let commentsHtml = post.comments.map(c => `<div class="comment">${c}</div>`).join("");
+
+        html += `
+          <div class="post">
+            <h3>${post.title}</h3>
+            <p>${post.content}</p>
+            <small>📅 ${new Date().toLocaleDateString()}</small>
+            <div style="margin-top: 20px;">
+              <h4>💬 评论</h4>
+              <textarea id="commentInput_${index}" placeholder="说点什么吧..." rows="3"></textarea>
+              <button onclick="addComment(${index})">发表评论</button>
+              <div id="comments_${index}">
+                ${commentsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+  </script>
 </body>
 </html>
